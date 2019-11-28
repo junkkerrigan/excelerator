@@ -1,0 +1,1 @@
+Lab #2 on OOP for Artem from K-25
