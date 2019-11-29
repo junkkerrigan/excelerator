@@ -33,13 +33,13 @@ namespace Excelerator
             TextBox textBox = new TextBox() 
             { 
                 Left = 50, 
-                Top = textLabel.Bottom + 10, 
+                Top = textLabel.Bottom + 5, 
                 Width = 300
             };
             Button confirmation = new Button()
             {
                 Text = "Submit",
-                Left = textBox.Right - 100,
+                Left = textBox.Right - 115,
                 Width = 100,
                 Height = 30,
                 Top = textBox.Bottom + 10, 
@@ -99,7 +99,6 @@ namespace Excelerator
     {
         int N = 0;
         int M = 0;
-        public bool AutoSelected { get; set; } = true;
 
         public MyCell SelectedCell {
             get {
@@ -117,6 +116,9 @@ namespace Excelerator
             MultiSelect = false;
             AddColumn(m);
             AddRow(n);
+            RowHeadersWidth = 60;
+            ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            RowHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
         public void AddRow(int num = 1)
@@ -159,8 +161,6 @@ namespace Excelerator
 
         public void Recalculate()
         {
-            Debug.WriteLine(SelectedCell);
-            SelectedCell.Value = $"{SelectedCell.Expression}val";
         }
     }
 
@@ -195,7 +195,7 @@ namespace Excelerator
 
         void InitializeTable()
         {
-            Table = new MyTable(10, 10)
+            Table = new MyTable(100, 10)
             {
                 Location = new Point(30, Toolbar.Bottom + 30),
                 Size = new Size(ClientSize.Width - 60, 
@@ -246,6 +246,13 @@ namespace Excelerator
                 Font = new Font("Times New Roman", 16),
                 Width = 300,
             };
+            ExpressionInCell.Enter += (s, e) =>
+            {
+                if (Table.SelectedCell != null)
+                {
+                    ExpressionInCell.Text = Table.SelectedCell.Expression;
+                }
+            };
             ExpressionInCell.TextChanged += (s, e) =>
             {
                 if (Table.SelectedCell != null)
@@ -255,11 +262,6 @@ namespace Excelerator
             };
             ExpressionInCell.Leave += (s, e) =>
             {
-                if (Table.AutoSelected)
-                {
-                    Table.AutoSelected = false;
-                    return;
-                }
                 Table.SelectedCell.Value = ExpressionInCell.Text;
                 Table.Recalculate();
             };
