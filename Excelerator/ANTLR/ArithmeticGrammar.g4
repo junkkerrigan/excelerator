@@ -19,6 +19,7 @@ component
 	| 'max(' (component ',') (component ',')* component ')' #Maximum
 	| NUMBER #Number
 	| CELL #Cell
+	| SYMBOL #Rest
 	;
 
 /*
@@ -35,3 +36,4 @@ CELL : COLTITLE NUMBER;
 NUMBER : ('0'..'9')+;
 COLTITLE : ('A'..'Z')+;
 WS : (' ' | '\t')+ -> skip;
+SYMBOL : .;

@@ -103,6 +103,20 @@ public partial class ArithmeticGrammarBaseListener : IArithmeticGrammarListener 
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitMaximum([NotNull] ArithmeticGrammarParser.MaximumContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by the <c>Rest</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRest([NotNull] ArithmeticGrammarParser.RestContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>Rest</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRest([NotNull] ArithmeticGrammarParser.RestContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by the <c>Multiplication</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// <para>The default implementation does nothing.</para>

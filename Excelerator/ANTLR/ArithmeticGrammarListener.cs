@@ -89,6 +89,18 @@ public interface IArithmeticGrammarListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitMaximum([NotNull] ArithmeticGrammarParser.MaximumContext context);
 	/// <summary>
+	/// Enter a parse tree produced by the <c>Rest</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterRest([NotNull] ArithmeticGrammarParser.RestContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>Rest</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitRest([NotNull] ArithmeticGrammarParser.RestContext context);
+	/// <summary>
 	/// Enter a parse tree produced by the <c>Multiplication</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>

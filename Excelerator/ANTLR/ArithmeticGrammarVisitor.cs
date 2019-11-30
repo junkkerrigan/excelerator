@@ -66,6 +66,13 @@ public interface IArithmeticGrammarVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitMaximum([NotNull] ArithmeticGrammarParser.MaximumContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>Rest</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRest([NotNull] ArithmeticGrammarParser.RestContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Multiplication</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>

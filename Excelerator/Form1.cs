@@ -107,19 +107,11 @@ namespace Excelerator
         }
     }
 
-    public class MyLexErrListener : IAntlrErrorListener<int>
-    {
-        public void SyntaxError(TextWriter output, IRecognizer recognizer, int offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
-        {
-            throw new Exception();
-
-        }
-    }
-
     public class MyParsErrListener : IAntlrErrorListener<IToken>
     {
         public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
         {
+            console.log("SE");
             throw new Exception();
         }
     }
@@ -132,7 +124,7 @@ namespace Excelerator
         {
         }
 
-        public int EvaluateExpression()
+        public int EvaluateExpression(HashSet<string> usedCells)
         {
             if (Expression == "")
             {
@@ -147,7 +139,7 @@ namespace Excelerator
                 var commonTokenStream = new CommonTokenStream(lexer);
                 var parser = new ArithmeticGrammarParser(commonTokenStream);
                 var expr = parser.expression();
-                return (new MyVisitor(DataGridView as MyTable)).Visit(expr);
+                return (new MyVisitor(DataGridView as MyTable, usedCells)).Visit(expr);
             }
             catch (Exception ex)
             {
@@ -168,9 +160,12 @@ namespace Excelerator
     {
         MyTable Table;
 
-        public MyVisitor(MyTable table) : base()
+        HashSet<string> UsedCells;
+
+        public MyVisitor(MyTable table, HashSet<string> usedCells) : base()
         {
             Table = table;
+            UsedCells = usedCells;
         }
         
         public override int VisitExpression(ArithmeticGrammarParser.ExpressionContext context)
@@ -278,13 +273,6 @@ namespace Excelerator
             return ans;
         }
 
-        //public override int VisitUnaryPlus([NotNull] ArithmeticGrammarParser.UnaryPlusContext context)
-        //{
-        //    int ans = Visit(context.component());
-        //    Debug.WriteLine($"unPl {ans}");
-        //    return ans;
-        //}
-
         public override int VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context)
         {
             int ans = Visit(context.component());
@@ -320,18 +308,27 @@ namespace Excelerator
             console.log($"neg {ans}");
             return ans;
         }
+        
         public override int VisitCell([NotNull] ArithmeticGrammarParser.CellContext context)
         {
             try
             {
                 string cellPosition = context.GetText();
+                if (UsedCells.Contains(cellPosition))
+                {
+                    var ex = new Exception();
+                    ex.Data.Add("Type", "reference loop");
+                    throw ex;
+                }
+                UsedCells.Add(cellPosition);
                 int titleLen = 0;
                 while (65 <= (int)cellPosition[titleLen] && (int)cellPosition[titleLen] <= 90)
                     titleLen++;
                 int colNum = Converter.ColumnTitleToNumber(cellPosition.Substring(0, titleLen)) - 1;
                 int rowNum = int.Parse(cellPosition.Substring(titleLen)) - 1;
                 MyCell cell = Table.Rows[rowNum].Cells[colNum] as MyCell;
-                int ans = cell.EvaluateExpression();
+                int ans = cell.EvaluateExpression(UsedCells);
+                UsedCells.Remove(cellPosition);
                 Debug.WriteLine($"{cellPosition} {ans}");
                 return ans;
             }
@@ -341,11 +338,11 @@ namespace Excelerator
             }
         }
 
-        //public override int VisitRest([NotNull] ArithmeticGrammarParser.RestContext context)
-        //{
-        //    throw new Exception();
-        //}
-        
+        public override int VisitRest([NotNull] ArithmeticGrammarParser.RestContext context)
+        {
+            throw new Exception();
+        }
+
         private int WalkLeft(ArithmeticGrammarParser.ComponentContext context)
         {
             return Visit(context.GetRuleContext<ArithmeticGrammarParser.ComponentContext>(0));
@@ -447,6 +444,7 @@ namespace Excelerator
             {
                 for (int j = 0; j < M; j++)
                 {
+                    console.log($"Cell {i} {j}: {GetCell(i, j).Expression}");
                     if (GetExpressionInCell(i, j) == "")
                     {
                         GetCell(i, j).Value = "";
@@ -456,17 +454,17 @@ namespace Excelerator
                     { 
                         var inputStream = new AntlrInputStream(GetExpressionInCell(i, j));
                         var lexer = new ArithmeticGrammarLexer(inputStream);
-                        //lexer.RemoveErrorListeners();
-                        //lexer.AddErrorListener(new MyLexErrListener());
                         var commonTokenStream = new CommonTokenStream(lexer);
                         var parser = new ArithmeticGrammarParser(commonTokenStream);
-                        //parser.RemoveErrorListeners();
-                        //parser.AddErrorListener(new MyParsErrListener());
+                        parser.RemoveErrorListeners();
+                        parser.AddErrorListener(new MyParsErrListener());
                         var expr = parser.expression();
-                        GetCell(i, j).Value = (new MyVisitor(this)).Visit(expr);
+                        GetCell(i, j).Value = 
+                            (new MyVisitor(this, new HashSet<string>())).Visit(expr);
                     }
                     catch 
                     {
+                        console.log("err");
                         throw;
                     }
                 }
@@ -505,7 +503,7 @@ namespace Excelerator
 
         void InitializeTable()
         {
-            Table = new MyTable(100, 10)
+            Table = new MyTable(10, 10)
             {
                 Location = new Point(30, Toolbar.Bottom + 30),
                 Size = new Size(ClientSize.Width - 60, 
@@ -532,7 +530,7 @@ namespace Excelerator
             Table.CellEndEdit += (s, e) =>
             {
                 MyCell changed = Table.GetCell(e.RowIndex, e.ColumnIndex);
-                string oldExpr = Table.SelectedCell.Expression;
+                string oldExpr = changed.Expression;
                 changed.Expression = (string)changed.Value;
                 try
                 {
