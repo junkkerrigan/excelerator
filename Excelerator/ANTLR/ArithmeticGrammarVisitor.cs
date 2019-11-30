@@ -80,19 +80,19 @@ public interface IArithmeticGrammarVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitSubstraction([NotNull] ArithmeticGrammarParser.SubstractionContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>Maximum</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitMaximum([NotNull] ArithmeticGrammarParser.MaximumContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>UnaryPlusNumber</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.

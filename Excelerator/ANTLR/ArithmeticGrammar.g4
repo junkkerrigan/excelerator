@@ -4,32 +4,31 @@ grammar ArithmeticGrammar;
  * Parser Rules
  */
 
-expression : component+ EOF;
+expression : component EOF;
 
 component 
-    : '(' component ')' #Parenthesis
-	| 'min(' (component ',') (component ',')* component ')' #Minimum
+	: 'min(' (component ',') (component ',')* component ')' #Minimum
 	| 'max(' (component ',') (component ',')* component ')' #Maximum
 	| component '^' component #Power
+	| component '%' component #Modulo
 	| component '+' component #Addition
 	| component '-' component #Substraction
 	| component '*' component #Multiplication
 	| component '/' component #Division
-	| component '%' component #Modulo
 	| '+(' component ')' #UnaryPlusParenthesis
 	| '-(' component ')' #UnaryMinusParenthesis
 	| '+' NUMBER #UnaryPlusNumber
 	| '-' NUMBER #UnaryMinusNumber
+    | '(' component ')' #Parenthesis
 	| NUMBER #Number
 	| CELL #Cell
 	;
 
+CELL : COLTITLE NUMBER;
+NUMBER : ('0'..'9')+;
+COLTITLE : ('A'..'Z')+;
 /*
  * Lexer Rules
  */
-
-CELL : (CHAR)+ NUMBER;
-NUMBER : ('0'..'9')+;
-CHAR : ('A'..'Z');
 
 WHITESPACE : (' '|'\t') -> skip;

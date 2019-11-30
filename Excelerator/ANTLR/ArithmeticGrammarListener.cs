@@ -113,18 +113,6 @@ public interface IArithmeticGrammarListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitSubstraction([NotNull] ArithmeticGrammarParser.SubstractionContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
-	/// <summary>
 	/// Enter a parse tree produced by the <c>Maximum</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
@@ -136,6 +124,18 @@ public interface IArithmeticGrammarListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitMaximum([NotNull] ArithmeticGrammarParser.MaximumContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>UnaryPlusNumber</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.

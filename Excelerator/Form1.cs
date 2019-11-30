@@ -10,10 +10,17 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
+using Antlr4.Runtime.Tree;
 
 namespace Excelerator
 {
-
+    public static class console
+    {
+        public static void log(object obj)
+        {
+            Debug.WriteLine(obj);
+        }
+    }
     // mod div
     // inc dec
     // power
@@ -65,7 +72,7 @@ namespace Excelerator
 
     public static class Converter
     {
-        public static string ToColumnTitle(int num)
+        public static string NumberToColumnTitle(int num)
         {
             string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string title = "";
@@ -85,6 +92,18 @@ namespace Excelerator
             }
             return title;
         }
+
+        public static int ColumnTitleToNumber(string title)
+        {
+            string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            int num = 0, pow = 1;
+            for(int i = title.Length - 1; i >= 0;  i--)
+            {
+                num += (alphabet.IndexOf(title[i]) + 1) * pow;
+                pow *= 26;
+            }
+            return num;
+        }
     }
 
     public class MyCell : DataGridViewTextBoxCell
@@ -93,6 +112,23 @@ namespace Excelerator
 
         public MyCell() : base()
         {
+        }
+
+        public int EvaluateExpression()
+        {
+            try
+            {
+                var inputStream = new AntlrInputStream(Expression);
+                var lexer = new ArithmeticGrammarLexer(inputStream);
+                var commonTokenStream = new CommonTokenStream(lexer);
+                var parser = new ArithmeticGrammarParser(commonTokenStream);
+                var expr = parser.expression();
+                return (new MyVisitor(DataGridView as MyTable)).Visit(expr);
+            }
+            catch
+            {
+                throw;
+            }            
         }
 
         public override object Clone()
@@ -104,11 +140,19 @@ namespace Excelerator
 
     public class MyVisitor : ArithmeticGrammarBaseVisitor<int>
     {
+        MyTable Table;
+        public MyVisitor(MyTable table) : base()
+        {
+            Table = table;
+        }
         public override int VisitExpression(ArithmeticGrammarParser.ExpressionContext context)
         {
             Debug.WriteLine(context.GetText());
-            int ans = Visit(context.component(0));
-            Debug.WriteLine(ans);
+            console.log(WalkLeft(context.component()));
+            console.log(WalkRight(context.component()));
+            Debug.WriteLine(context.component().GetText());
+            int ans = Visit(context.component());
+            Debug.WriteLine($"a{ans}");
             return ans;
         }
 
@@ -142,15 +186,30 @@ namespace Excelerator
 
         public override int VisitDivision(ArithmeticGrammarParser.DivisionContext context)
         {
-            int ans = WalkLeft(context) / WalkRight(context);
+            var l = WalkLeft(context);
+            var r = WalkRight(context);
+            if (r == 0)
+            {
+                var ex = new DivideByZeroException();
+                ex.Data.Add("Type", "dividing by zero");
+                throw ex;
+            }
+            int ans = l / r;
             Debug.WriteLine($"div {ans}");
             return ans;
         }
 
         public override int VisitModulo([NotNull] ArithmeticGrammarParser.ModuloContext context)
         {
-
-            int ans = WalkLeft(context) % WalkRight(context);
+            var l = WalkLeft(context);
+            var r = WalkRight(context);
+            if (r == 0)
+            {
+                var ex = new DivideByZeroException(); 
+                ex.Data.Add("Type", "modulo by zero");
+                throw ex;
+            }
+            int ans = l % r;
             Debug.WriteLine($"mod {ans}");
             return ans;
         }
@@ -159,6 +218,18 @@ namespace Excelerator
         {
             var l = WalkLeft(context);
             var r = WalkRight(context);
+            if (r < 0)
+            {
+                var ex = new ArgumentOutOfRangeException();
+                ex.Data.Add("Type", "negative power");
+                throw ex;
+            }
+            if (r == 0 && l == 0)
+            {
+                var ex = new ArgumentOutOfRangeException();
+                ex.Data.Add("Type", "0^0");
+                throw ex;
+            }
             int ans = (int)Math.Pow(l, r);
             Debug.WriteLine($"pow {ans}");
             return ans;
@@ -199,6 +270,46 @@ namespace Excelerator
             return ans;
         }
 
+        public override int VisitMaximum([NotNull] ArithmeticGrammarParser.MaximumContext context)
+        {
+            int ans = 0;
+            foreach (var op in context.component())
+            {
+                ans = Math.Max(Visit(op), ans);
+            }
+            return ans;
+        }
+
+        public override int VisitMinimum([NotNull] ArithmeticGrammarParser.MinimumContext context)
+        {
+            int ans = 0;
+            foreach (var op in context.component())
+            {
+                ans = Math.Min(Visit(op), ans);
+            }
+            return ans;
+        }
+
+        public override int VisitCell([NotNull] ArithmeticGrammarParser.CellContext context)
+        {
+            try
+            {
+                string cellPosition = context.GetText();
+                int titleLen = 0;
+                while (65 <= (int)cellPosition[titleLen] && (int)cellPosition[titleLen] <= 90)
+                    titleLen++;
+                int colNum = Converter.ColumnTitleToNumber(cellPosition.Substring(0, titleLen)) - 1;
+                int rowNum = int.Parse(cellPosition.Substring(titleLen)) - 1;
+                MyCell cell = Table.Rows[rowNum].Cells[colNum] as MyCell;
+                return cell.EvaluateExpression();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        //public override 
         private int WalkLeft(ArithmeticGrammarParser.ComponentContext context)
         {
             return Visit(context.GetRuleContext<ArithmeticGrammarParser.ComponentContext>(0));
@@ -253,7 +364,7 @@ namespace Excelerator
             {
                 M++;
                 DataGridViewColumn col = new DataGridViewColumn(new MyCell());
-                col.HeaderCell.Value = Converter.ToColumnTitle(M);
+                col.HeaderCell.Value = Converter.NumberToColumnTitle(M);
                 Columns.Add(col);
             }
         }
@@ -268,6 +379,10 @@ namespace Excelerator
             Columns.RemoveAt(num - 1);
         }
 
+        public MyCell GetCell(int r, int c)
+        {
+            return Rows[r].Cells[c] as MyCell;
+        }
         public string GetExpressionInCell(int r, int c)
         {
             if (r < 0 || c < 0) throw new IndexOutOfRangeException();
@@ -276,26 +391,41 @@ namespace Excelerator
 
         public void Recalculate()
         {
-            try
+            for (int i = 0; i < N; i++)
             {
-                var str = "( -(22^(4  /2 )) + 23 ^2) % (26 % 22)";
-                var inputStream = new AntlrInputStream(str);
-                var lexer = new ArithmeticGrammarLexer(inputStream);
-                var commonTokenStream = new CommonTokenStream(lexer);
-                var parser = new ArithmeticGrammarParser(commonTokenStream);
-                var expr = parser.expression();
-                (new MyVisitor()).Visit(expr);
-            }
-            catch (Exception Ex)
-            {
-                Console.Error.WriteLine(Ex.Message);
+                for (int j = 0; j < M; j++)
+                {
+                    if (GetExpressionInCell(i, j) == "") continue;
+                    try
+                    { 
+                        var inputStream = new AntlrInputStream(GetExpressionInCell(i, j));
+                        var lexer = new ArithmeticGrammarLexer(inputStream);
+                        var commonTokenStream = new CommonTokenStream(lexer);
+                        var parser = new ArithmeticGrammarParser(commonTokenStream);
+                        var expr = parser.expression();
+                        GetCell(i, j).Value = (new MyVisitor(this)).Visit(expr);
+                    }
+                    catch (Exception ex)
+                    {
+                            if (ex.Data.Contains("Type"))
+                            {
+                                MessageBox.Show($"Invalid expression: {ex.Data["Type"]}",
+                                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            else
+                            {
+                                MessageBox.Show($"Invalid expression",
+                                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                    }
+                }
             }
         }
     }
 
     public partial class Form1 : Form
     {
-        MyTable Table;
+        public MyTable Table { get; set; }
         MenuStrip MainMenu;
         TextBox ExpressionInCell;
         Panel Toolbar;
@@ -351,7 +481,6 @@ namespace Excelerator
             {
                 MyCell changed = Table.Rows[e.RowIndex].Cells[e.ColumnIndex] as MyCell;
                 changed.Expression = (string)changed.Value;
-                Table.SelectedCell.Expression = (string)Table.SelectedCell.Value;
                 Table.Recalculate();
             };
             //Table.CellLeave += (s, e) =>
@@ -375,13 +504,13 @@ namespace Excelerator
                 Font = new Font("Times New Roman", 16),
                 Width = 300,
             };
-            ExpressionInCell.Enter += (s, e) =>
-            {
-                if (Table.SelectedCell != null)
-                {
-                    ExpressionInCell.Text = Table.SelectedCell.Expression;
-                }
-            };
+            //ExpressionInCell.Enter += (s, e) =>
+            //{
+            //    if (Table.SelectedCell != null)
+            //    {
+            //        ExpressionInCell.Text = Table.SelectedCell.Expression;
+            //    }
+            //};
             ExpressionInCell.TextChanged += (s, e) =>
             {
                 if (Table.SelectedCell != null)
@@ -391,7 +520,7 @@ namespace Excelerator
             };
             ExpressionInCell.Leave += (s, e) =>
             {
-                Table.SelectedCell.Value = ExpressionInCell.Text;
+                Table.SelectedCell.Expression = ExpressionInCell.Text;
                 Table.Recalculate();
             };
             Toolbar.Controls.Add(ExpressionInCell);
