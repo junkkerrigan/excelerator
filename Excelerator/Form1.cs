@@ -18,6 +18,7 @@ namespace Excelerator
     // inc dec
     // power
     // max, min
+    // java -jar antlr-4.7.2-complete.jar -Dlanguage=CSharp.\ArithmeticGrammar.g4 -visitor
     public static class Prompt
     {
         public static string ShowDialog(string text, string caption)
@@ -120,34 +121,30 @@ namespace Excelerator
 
         public override int VisitAddition(ArithmeticGrammarParser.AdditionContext context)
         {
-            var left = WalkLeft(context);
-            var right = WalkRight(context);
-
-            return left + right;
+            int ans = WalkLeft(context) + WalkRight(context);
+            Debug.WriteLine($"plus {ans}");
+            return ans;
         }
 
         public override int VisitSubstraction(ArithmeticGrammarParser.SubstractionContext context)
         {
-            var left = WalkLeft(context);
-            var right = WalkRight(context);
-
-            return left - right;
+            int ans = WalkLeft(context) - WalkRight(context);
+            Debug.WriteLine($"minus {ans}");
+            return ans;
         }
 
         public override int VisitMultiplication(ArithmeticGrammarParser.MultiplicationContext context)
         {
-            var left = WalkLeft(context);
-            var right = WalkRight(context);
-
-            return left * right;
+            int ans = WalkLeft(context) * WalkRight(context);
+            Debug.WriteLine($"mult {ans}");
+            return ans;
         }
 
         public override int VisitDivision(ArithmeticGrammarParser.DivisionContext context)
         {
-            var left = WalkLeft(context);
-            var right = WalkRight(context);
-
-            return left / right;
+            int ans = WalkLeft(context) / WalkRight(context);
+            Debug.WriteLine($"div {ans}");
+            return ans;
         }
 
         public override int VisitModulo([NotNull] ArithmeticGrammarParser.ModuloContext context)
@@ -170,27 +167,27 @@ namespace Excelerator
         public override int VisitUnaryMinusParenthesis([NotNull] ArithmeticGrammarParser.UnaryMinusParenthesisContext context)
         {
             int ans = -1 * Visit(context.component());
-            Debug.WriteLine($"unMin {ans}");
+            Debug.WriteLine($"unMinPar {ans}");
             return ans;
         }
 
         public override int VisitUnaryPlusParenthesis([NotNull] ArithmeticGrammarParser.UnaryPlusParenthesisContext context)
         {
             int ans = Visit(context.component());
-            Debug.WriteLine($"unPl {ans}");
+            Debug.WriteLine($"unPlPar {ans}");
             return ans;
         }
 
-        public override int VisitUnaryMinusNumber([NotNull] ArithmeticGrammarParser.UnaryMinusParenthesisContext context)
+        public override int VisitUnaryMinusNumber([NotNull] ArithmeticGrammarParser.UnaryMinusNumberContext context)
         {
-            int ans = -1 * Visit(context.component());
+            int ans = int.Parse(context.GetText());
             Debug.WriteLine($"unMin {ans}");
             return ans;
         }
 
-        public override int VisitUnaryPlusNumber([NotNull] ArithmeticGrammarParser.UnaryPlusParenthesisContext context)
+        public override int VisitUnaryPlusNumber([NotNull] ArithmeticGrammarParser.UnaryPlusNumberContext context)
         {
-            int ans = Visit(context.component());
+            int ans = int.Parse(context.GetText());
             Debug.WriteLine($"unPl {ans}");
             return ans;
         }
@@ -198,7 +195,7 @@ namespace Excelerator
         public override int VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context)
         {
             int ans = Visit(context.component());
-            Debug.WriteLine($"unPar {ans}");
+            Debug.WriteLine($"Par {ans}");
             return ans;
         }
 
@@ -281,7 +278,7 @@ namespace Excelerator
         {
             try
             {
-                var str = "(-2 + 3) % (2)";//"(( -(22^(4  /2 )) + 23 ^2) % (23 / 22))";
+                var str = "( -(22^(4  /2 )) + 23 ^2) % (26 % 22)";
                 var inputStream = new AntlrInputStream(str);
                 var lexer = new ArithmeticGrammarLexer(inputStream);
                 var commonTokenStream = new CommonTokenStream(lexer);

@@ -8,18 +8,18 @@ expression : component+ EOF;
 
 component 
     : '(' component ')' #Parenthesis
+	| 'min(' (component ',') (component ',')* component ')' #Minimum
+	| 'max(' (component ',') (component ',')* component ')' #Maximum
+	| component '^' component #Power
 	| component '+' component #Addition
 	| component '-' component #Substraction
 	| component '*' component #Multiplication
 	| component '/' component #Division
-	| component '^' component #Power
 	| component '%' component #Modulo
 	| '+(' component ')' #UnaryPlusParenthesis
 	| '-(' component ')' #UnaryMinusParenthesis
 	| '+' NUMBER #UnaryPlusNumber
 	| '-' NUMBER #UnaryMinusNumber
-	| 'max(' (component ',') (component ',')* component ')' #Maximum
-	| 'min(' (component ',') (component ',')* component ')' #Minimum
 	| NUMBER #Number
 	| CELL #Cell
 	;
