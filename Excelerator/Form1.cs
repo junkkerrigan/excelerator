@@ -8,9 +8,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Antlr4.Runtime;
+using Antlr4.Runtime.Misc;
 
 namespace Excelerator
 {
+
+    // mod div
+    // inc dec
+    // power
+    // max, min
     public static class Prompt
     {
         public static string ShowDialog(string text, string caption)
@@ -94,6 +101,117 @@ namespace Excelerator
         }
     }
 
+    public class MyVisitor : ArithmeticGrammarBaseVisitor<int>
+    {
+        public override int VisitExpression(ArithmeticGrammarParser.ExpressionContext context)
+        {
+            Debug.WriteLine(context.GetText());
+            int ans = Visit(context.component(0));
+            Debug.WriteLine(ans);
+            return ans;
+        }
+
+        public override int VisitNumber([NotNull] ArithmeticGrammarParser.NumberContext context)
+        {
+            int ans = int.Parse(context.GetText());
+            Debug.WriteLine($"num {ans}");
+            return ans;
+        }
+
+        public override int VisitAddition(ArithmeticGrammarParser.AdditionContext context)
+        {
+            var left = WalkLeft(context);
+            var right = WalkRight(context);
+
+            return left + right;
+        }
+
+        public override int VisitSubstraction(ArithmeticGrammarParser.SubstractionContext context)
+        {
+            var left = WalkLeft(context);
+            var right = WalkRight(context);
+
+            return left - right;
+        }
+
+        public override int VisitMultiplication(ArithmeticGrammarParser.MultiplicationContext context)
+        {
+            var left = WalkLeft(context);
+            var right = WalkRight(context);
+
+            return left * right;
+        }
+
+        public override int VisitDivision(ArithmeticGrammarParser.DivisionContext context)
+        {
+            var left = WalkLeft(context);
+            var right = WalkRight(context);
+
+            return left / right;
+        }
+
+        public override int VisitModulo([NotNull] ArithmeticGrammarParser.ModuloContext context)
+        {
+
+            int ans = WalkLeft(context) % WalkRight(context);
+            Debug.WriteLine($"mod {ans}");
+            return ans;
+        }
+
+        public override int VisitPower([NotNull] ArithmeticGrammarParser.PowerContext context)
+        {
+            var l = WalkLeft(context);
+            var r = WalkRight(context);
+            int ans = (int)Math.Pow(l, r);
+            Debug.WriteLine($"pow {ans}");
+            return ans;
+        }
+
+        public override int VisitUnaryMinusParenthesis([NotNull] ArithmeticGrammarParser.UnaryMinusParenthesisContext context)
+        {
+            int ans = -1 * Visit(context.component());
+            Debug.WriteLine($"unMin {ans}");
+            return ans;
+        }
+
+        public override int VisitUnaryPlusParenthesis([NotNull] ArithmeticGrammarParser.UnaryPlusParenthesisContext context)
+        {
+            int ans = Visit(context.component());
+            Debug.WriteLine($"unPl {ans}");
+            return ans;
+        }
+
+        public override int VisitUnaryMinusNumber([NotNull] ArithmeticGrammarParser.UnaryMinusParenthesisContext context)
+        {
+            int ans = -1 * Visit(context.component());
+            Debug.WriteLine($"unMin {ans}");
+            return ans;
+        }
+
+        public override int VisitUnaryPlusNumber([NotNull] ArithmeticGrammarParser.UnaryPlusParenthesisContext context)
+        {
+            int ans = Visit(context.component());
+            Debug.WriteLine($"unPl {ans}");
+            return ans;
+        }
+
+        public override int VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context)
+        {
+            int ans = Visit(context.component());
+            Debug.WriteLine($"unPar {ans}");
+            return ans;
+        }
+
+        private int WalkLeft(ArithmeticGrammarParser.ComponentContext context)
+        {
+            return Visit(context.GetRuleContext<ArithmeticGrammarParser.ComponentContext>(0));
+        }
+
+        private int WalkRight(ArithmeticGrammarParser.ComponentContext context)
+        {
+            return Visit(context.GetRuleContext<ArithmeticGrammarParser.ComponentContext>(1));
+        }
+    }
 
     public class MyTable : DataGridView
     {
@@ -161,6 +279,20 @@ namespace Excelerator
 
         public void Recalculate()
         {
+            try
+            {
+                var str = "(-2 + 3) % (2)";//"(( -(22^(4  /2 )) + 23 ^2) % (23 / 22))";
+                var inputStream = new AntlrInputStream(str);
+                var lexer = new ArithmeticGrammarLexer(inputStream);
+                var commonTokenStream = new CommonTokenStream(lexer);
+                var parser = new ArithmeticGrammarParser(commonTokenStream);
+                var expr = parser.expression();
+                (new MyVisitor()).Visit(expr);
+            }
+            catch (Exception Ex)
+            {
+                Console.Error.WriteLine(Ex.Message);
+            }
         }
     }
 
