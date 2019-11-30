@@ -38,47 +38,26 @@ public interface IArithmeticGrammarVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitExpression([NotNull] ArithmeticGrammarParser.ExpressionContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>NegativeNumber</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNegativeNumber([NotNull] ArithmeticGrammarParser.NegativeNumberContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Minimum</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitMinimum([NotNull] ArithmeticGrammarParser.MinimumContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>Addition</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAddition([NotNull] ArithmeticGrammarParser.AdditionContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>Multiplication</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitMultiplication([NotNull] ArithmeticGrammarParser.MultiplicationContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>Modulo</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitModulo([NotNull] ArithmeticGrammarParser.ModuloContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>UnaryPlusParenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitUnaryPlusParenthesis([NotNull] ArithmeticGrammarParser.UnaryPlusParenthesisContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>Substraction</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitSubstraction([NotNull] ArithmeticGrammarParser.SubstractionContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Maximum</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
@@ -87,19 +66,19 @@ public interface IArithmeticGrammarVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitMaximum([NotNull] ArithmeticGrammarParser.MaximumContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>Parenthesis</c>
+	/// Visit a parse tree produced by the <c>Multiplication</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
+	Result VisitMultiplication([NotNull] ArithmeticGrammarParser.MultiplicationContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>UnaryPlusNumber</c>
+	/// Visit a parse tree produced by the <c>Addition</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitUnaryPlusNumber([NotNull] ArithmeticGrammarParser.UnaryPlusNumberContext context);
+	Result VisitAddition([NotNull] ArithmeticGrammarParser.AdditionContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Number</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
@@ -108,19 +87,19 @@ public interface IArithmeticGrammarVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitNumber([NotNull] ArithmeticGrammarParser.NumberContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>UnaryMinusParenthesis</c>
+	/// Visit a parse tree produced by the <c>Modulo</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitUnaryMinusParenthesis([NotNull] ArithmeticGrammarParser.UnaryMinusParenthesisContext context);
+	Result VisitModulo([NotNull] ArithmeticGrammarParser.ModuloContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>Division</c>
+	/// Visit a parse tree produced by the <c>UnaryMinus</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitDivision([NotNull] ArithmeticGrammarParser.DivisionContext context);
+	Result VisitUnaryMinus([NotNull] ArithmeticGrammarParser.UnaryMinusContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Cell</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
@@ -128,13 +107,6 @@ public interface IArithmeticGrammarVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitCell([NotNull] ArithmeticGrammarParser.CellContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>UnaryMinusNumber</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitUnaryMinusNumber([NotNull] ArithmeticGrammarParser.UnaryMinusNumberContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Power</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.

@@ -7,28 +7,31 @@ grammar ArithmeticGrammar;
 expression : component EOF;
 
 component 
-	: 'min(' (component ',') (component ',')* component ')' #Minimum
+	: '(' component ')' #Parenthesis
+	| component POW component #Power
+	| component operatorToken=(DIV|MULT) component #Multiplication
+	| component operatorToken=(PLUS|MINUS) component #Addition
+	| component MOD component #Modulo
+	| '-' NUMBER #NegativeNumber 
+	/*| '+(' component ')' #UnaryPlus */ 
+	| MINUS component #UnaryMinus 
+	| 'min(' (component ',') (component ',')* component ')' #Minimum
 	| 'max(' (component ',') (component ',')* component ')' #Maximum
-	| component '^' component #Power
-	| component '%' component #Modulo
-	| component '+' component #Addition
-	| component '-' component #Substraction
-	| component '*' component #Multiplication
-	| component '/' component #Division
-	| '+(' component ')' #UnaryPlusParenthesis
-	| '-(' component ')' #UnaryMinusParenthesis
-	| '+' NUMBER #UnaryPlusNumber
-	| '-' NUMBER #UnaryMinusNumber
-    | '(' component ')' #Parenthesis
 	| NUMBER #Number
 	| CELL #Cell
 	;
 
-CELL : COLTITLE NUMBER;
-NUMBER : ('0'..'9')+;
-COLTITLE : ('A'..'Z')+;
 /*
  * Lexer Rules
  */
 
-WHITESPACE : (' '|'\t') -> skip;
+POW : '^';
+MULT : '*';
+DIV : '/';
+PLUS : '+';
+MINUS : '-';
+MOD : '%';
+CELL : COLTITLE NUMBER;
+NUMBER : ('0'..'9')+;
+COLTITLE : ('A'..'Z')+;
+WS : (' ' | '\t')+ -> skip;
