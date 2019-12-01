@@ -404,6 +404,7 @@ namespace Excelerator
 
         public MyTable(int n, int m) : base()
         {
+            AllowUserToAddRows = false;
             MultiSelect = false;
             AddColumn(m);
             AddRow(n);
@@ -582,7 +583,54 @@ namespace Excelerator
             }
             return clone;
         }
-        
+
+        public string Serialize()
+        {
+            string data = $"{N} {M}\n";
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < M; j++)
+                {
+                    data += GetCell(i, j).Expression + '\n';
+                }
+            }
+            return data;
+        }
+
+        public static MyTable CreateFromSerialized(string data)
+        {
+            try 
+            {
+                var reader = new StringReader(data);
+                var sizes = reader.ReadLine();
+                var n = int.Parse(sizes.Substring(0, sizes.IndexOf(' ')));
+                var m = int.Parse(sizes.Substring(sizes.IndexOf(' ') + 1));
+                console.log($"created table with sizes {n} and {m}");
+                MyTable table = new MyTable(n, m);
+                for (int i = 0; i < n; i++)
+                {
+                    for (int j = 0; j < m; j++)
+                    {
+                        table.GetCell(i, j).Expression = reader.ReadLine();
+                        console.log($"in cell ({i},{j}) now {table.GetCell(i, j).Expression}");
+                    }
+                }
+                for (int i = 0; i < n; i++)
+                {
+                    for (int j = 0; j < m; j++)
+                    {
+                        table.Recalculate(table.GetCell(i, j));
+                        console.log($"value of ({i},{j}) now {table.GetCell(i, j).Value}");
+                    }
+                }
+                return table;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         private void CalculateCell(MyCell cell)
         {
             try
@@ -669,7 +717,6 @@ namespace Excelerator
                 Location = new Point(30, Toolbar.Bottom + 30),
                 Size = new Size(ClientSize.Width - 60, 
                     ClientSize.Height - Toolbar.Bottom - 60),
-                AllowUserToAddRows = false,
             };
             
             Table.CellEnter += (s, e) =>
@@ -844,8 +891,46 @@ namespace Excelerator
                 Font = new Font("Times New Roman", 12)
             };
             var file = new ToolStripMenuItem("File");
-            var save = new ToolStripMenuItem("Save");
-            var open = new ToolStripMenuItem("Open");
+            var save = new ToolStripMenuItem("Save to");
+            save.Click += (s, e) =>
+            {
+                var saveTo = new SaveFileDialog()
+                {
+                    Filter = "Excelerator files (*.xclr)|*.xclr",
+                };
+                if (saveTo.ShowDialog() == DialogResult.OK)
+                {
+                    File.WriteAllText(saveTo.FileName, Table.Serialize());
+                }
+            };
+            var open = new ToolStripMenuItem("Open from");
+            open.Click += (s, e) =>
+            {
+                var openFrom = new OpenFileDialog()
+                {
+                    Filter = "Excelerator files (*.xclr)|*.xclr",
+                };
+                if (openFrom.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        Table.SuspendLayout();
+                        var newTable = MyTable.CreateFromSerialized(File.ReadAllText(openFrom.FileName));
+                        Controls.Remove(Table);
+                        newTable.Location = new Point(30, Toolbar.Bottom + 30);
+                        newTable.Size = new Size(ClientSize.Width - 60,
+                            ClientSize.Height - Toolbar.Bottom - 60);
+                        Table = newTable;
+                        Controls.Add(Table);
+                        Table.ResumeLayout();
+                    }
+                    catch
+                    {
+                        MessageBox.Show($"Impossible to open: {openFrom.FileName} is not valid" +
+                            $" .xclr file", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            };
             file.DropDownItems.Add(save);
             file.DropDownItems.Add(open);
             MainMenu.Items.Add(file);
