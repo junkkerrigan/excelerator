@@ -444,9 +444,54 @@ namespace Excelerator
             cur.Dependencies.Clear();
         }
 
-        public void DeleteRow(int num)
+        public void DeleteRow(int idx)
         {
-            Rows.RemoveAt(num - 1);
+            idx--;
+            bool canDelete = true;
+            for (int i = 0; i < M; i++)
+            {
+                var cell = GetCell(idx, i);
+                foreach (var d in cell.Depended)
+                {
+                    if (d.RowIndex == idx) continue;
+                    canDelete = false;
+                    break;
+                }
+            }
+            if (canDelete)
+            {
+                ShiftRowTitles(idx);
+                Rows.RemoveAt(idx);
+                N--;
+                return;
+            }
+            var isDelete = MessageBox.Show("If you delete this row, some cells" +
+                " will be cleared. Delete this row?", "Danger",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (isDelete == DialogResult.No) return;
+            try
+            {
+                for (int i = 0; i < M; i++)
+                {
+                    var cell = GetCell(idx, i);
+                    ResetDepended(cell);
+                }
+                ShiftRowTitles(idx);
+                Rows.RemoveAt(idx);
+                N--;
+            }
+            catch (Exception ex)
+            {
+                console.log($"in DelRow: {ex.Message}");
+            }
+        }
+
+        private void ShiftRowTitles(int to)
+        {
+            for (int i = N - 1; i > to; i--)
+            {
+                Rows[i].HeaderCell.Value = Rows[i - 1].HeaderCell.Value;
+            }
         }
 
         public void DeleteColumn(int idx)
@@ -467,6 +512,7 @@ namespace Excelerator
             {
                 ShiftColTitles(idx);
                 Columns.RemoveAt(idx);
+                M--;
                 return;
             }
             var isDelete = MessageBox.Show("If you delete this column, some cells" +
@@ -482,10 +528,11 @@ namespace Excelerator
                 }
                 ShiftColTitles(idx);
                 Columns.RemoveAt(idx);
+                M--;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                console.log(ex.Message);
+                console.log($"in DelCol: {ex.Message}");
             }
         }
 
