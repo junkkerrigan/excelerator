@@ -684,7 +684,9 @@ namespace Excelerator
     public partial class Form1 : Form
     {
         public MyTable Table { get; set; }
+        bool UpToDate = true;
         MenuStrip MainMenu;
+        ToolStripMenuItem Save, Open;
         TextBox ExpressionInCell;
         Panel Toolbar;
         Button AddRow, AddCol, DelRow, DelCol;
@@ -696,6 +698,19 @@ namespace Excelerator
             InitializeToolbar();
             InitializeTable();
             Resize += Form1_Resize;
+            FormClosed += Form1_FormClosed;
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (UpToDate) return; 
+            var isSave = MessageBox.Show("You have unsaved changes, they will be lost if you" +
+                " close the application. Save changes?", "Danger", MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            if (isSave == DialogResult.Yes)
+            {
+                Save.PerformClick();
+            }
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -771,6 +786,7 @@ namespace Excelerator
                     changed.Expression = oldExpr;
                     Table.Recalculate(changed);
                 }
+                UpToDate = false;
             };
             Controls.Add(Table);
             Table.ResumeLayout();
@@ -813,6 +829,7 @@ namespace Excelerator
                     Table.SelectedCell.Expression = oldExpr;
                     Table.Recalculate(Table.SelectedCell);
                 }
+                UpToDate = false;
             };
             Toolbar.Controls.Add(ExpressionInCell);
             InitializeButtons();
@@ -904,8 +921,8 @@ namespace Excelerator
                 Font = new Font("Times New Roman", 12)
             };
             var file = new ToolStripMenuItem("File");
-            var save = new ToolStripMenuItem("Save to");
-            save.Click += (s, e) =>
+            Save = new ToolStripMenuItem("Save to");
+            Save.Click += (s, e) =>
             {
                 var saveTo = new SaveFileDialog()
                 {
@@ -915,9 +932,10 @@ namespace Excelerator
                 {
                     File.WriteAllText(saveTo.FileName, Table.Serialize());
                 }
+                UpToDate = true;
             };
-            var open = new ToolStripMenuItem("Open from");
-            open.Click += (s, e) =>
+            Open = new ToolStripMenuItem("Open from");
+            Open.Click += (s, e) =>
             {
                 var openFrom = new OpenFileDialog()
                 {
@@ -938,10 +956,11 @@ namespace Excelerator
                     }
                 }
             };
-            file.DropDownItems.Add(save);
-            file.DropDownItems.Add(open);
+            file.DropDownItems.Add(Save);
+            file.DropDownItems.Add(Open);
             MainMenu.Items.Add(file);
             Controls.Add(MainMenu);
         }
+
     }
 }
