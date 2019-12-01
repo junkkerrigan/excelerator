@@ -7,14 +7,14 @@ grammar ArithmeticGrammar;
 expression : component EOF;
 
 component 
-	: '(' component ')' #Parenthesis
+	: '-' NUMBER #NegativeNumber 
+	| MINUS component #UnaryMinus 
+	| '(' component ')' #Parenthesis
 	| component POW component #Power
 	| component operatorToken=(DIV|MULT) component #Multiplication
 	| component operatorToken=(PLUS|MINUS) component #Addition
 	| component MOD component #Modulo
-	| '-' NUMBER #NegativeNumber 
 	/*| '+(' component ')' #UnaryPlus */ 
-	| MINUS component #UnaryMinus 
 	| 'min(' (component ',') (component ',')* component ')' #Minimum
 	| 'max(' (component ',') (component ',')* component ')' #Maximum
 	| NUMBER #Number

@@ -47,20 +47,6 @@ public partial class ArithmeticGrammarBaseListener : IArithmeticGrammarListener 
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitExpression([NotNull] ArithmeticGrammarParser.ExpressionContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context) { }
-	/// <summary>
 	/// Enter a parse tree produced by the <c>NegativeNumber</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -74,6 +60,20 @@ public partial class ArithmeticGrammarBaseListener : IArithmeticGrammarListener 
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitNegativeNumber([NotNull] ArithmeticGrammarParser.NegativeNumberContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by the <c>Minimum</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.

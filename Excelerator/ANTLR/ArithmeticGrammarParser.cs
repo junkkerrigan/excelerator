@@ -143,6 +143,24 @@ public partial class ArithmeticGrammarParser : Parser {
 			base.CopyFrom(context);
 		}
 	}
+	public partial class NegativeNumberContext : ComponentContext {
+		public ITerminalNode MINUS() { return GetToken(ArithmeticGrammarParser.MINUS, 0); }
+		public ITerminalNode NUMBER() { return GetToken(ArithmeticGrammarParser.NUMBER, 0); }
+		public NegativeNumberContext(ComponentContext context) { CopyFrom(context); }
+		public override void EnterRule(IParseTreeListener listener) {
+			IArithmeticGrammarListener typedListener = listener as IArithmeticGrammarListener;
+			if (typedListener != null) typedListener.EnterNegativeNumber(this);
+		}
+		public override void ExitRule(IParseTreeListener listener) {
+			IArithmeticGrammarListener typedListener = listener as IArithmeticGrammarListener;
+			if (typedListener != null) typedListener.ExitNegativeNumber(this);
+		}
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IArithmeticGrammarVisitor<TResult> typedVisitor = visitor as IArithmeticGrammarVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitNegativeNumber(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
 	public partial class ParenthesisContext : ComponentContext {
 		public ComponentContext component() {
 			return GetRuleContext<ComponentContext>(0);
@@ -159,24 +177,6 @@ public partial class ArithmeticGrammarParser : Parser {
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			IArithmeticGrammarVisitor<TResult> typedVisitor = visitor as IArithmeticGrammarVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitParenthesis(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-	public partial class NegativeNumberContext : ComponentContext {
-		public ITerminalNode MINUS() { return GetToken(ArithmeticGrammarParser.MINUS, 0); }
-		public ITerminalNode NUMBER() { return GetToken(ArithmeticGrammarParser.NUMBER, 0); }
-		public NegativeNumberContext(ComponentContext context) { CopyFrom(context); }
-		public override void EnterRule(IParseTreeListener listener) {
-			IArithmeticGrammarListener typedListener = listener as IArithmeticGrammarListener;
-			if (typedListener != null) typedListener.EnterNegativeNumber(this);
-		}
-		public override void ExitRule(IParseTreeListener listener) {
-			IArithmeticGrammarListener typedListener = listener as IArithmeticGrammarListener;
-			if (typedListener != null) typedListener.ExitNegativeNumber(this);
-		}
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			IArithmeticGrammarVisitor<TResult> typedVisitor = visitor as IArithmeticGrammarVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitNegativeNumber(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -414,31 +414,31 @@ public partial class ArithmeticGrammarParser : Parser {
 			switch ( Interpreter.AdaptivePredict(TokenStream,2,Context) ) {
 			case 1:
 				{
-				_localctx = new ParenthesisContext(_localctx);
+				_localctx = new NegativeNumberContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
 
-				State = 8; Match(T__0);
-				State = 9; component(0);
-				State = 10; Match(T__1);
+				State = 8; Match(MINUS);
+				State = 9; Match(NUMBER);
 				}
 				break;
 			case 2:
 				{
-				_localctx = new NegativeNumberContext(_localctx);
+				_localctx = new UnaryMinusContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 12; Match(MINUS);
-				State = 13; Match(NUMBER);
+				State = 10; Match(MINUS);
+				State = 11; component(11);
 				}
 				break;
 			case 3:
 				{
-				_localctx = new UnaryMinusContext(_localctx);
+				_localctx = new ParenthesisContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 14; Match(MINUS);
-				State = 15; component(6);
+				State = 12; Match(T__0);
+				State = 13; component(0);
+				State = 14; Match(T__1);
 				}
 				break;
 			case 4:
@@ -544,9 +544,9 @@ public partial class ArithmeticGrammarParser : Parser {
 						_localctx = new PowerContext(new ComponentContext(_parentctx, _parentState));
 						PushNewRecursionContext(_localctx, _startState, RULE_component);
 						State = 51;
-						if (!(Precpred(Context, 11))) throw new FailedPredicateException(this, "Precpred(Context, 11)");
+						if (!(Precpred(Context, 9))) throw new FailedPredicateException(this, "Precpred(Context, 9)");
 						State = 52; Match(POW);
-						State = 53; component(12);
+						State = 53; component(10);
 						}
 						break;
 					case 2:
@@ -554,7 +554,7 @@ public partial class ArithmeticGrammarParser : Parser {
 						_localctx = new MultiplicationContext(new ComponentContext(_parentctx, _parentState));
 						PushNewRecursionContext(_localctx, _startState, RULE_component);
 						State = 54;
-						if (!(Precpred(Context, 10))) throw new FailedPredicateException(this, "Precpred(Context, 10)");
+						if (!(Precpred(Context, 8))) throw new FailedPredicateException(this, "Precpred(Context, 8)");
 						State = 55;
 						((MultiplicationContext)_localctx).operatorToken = TokenStream.LT(1);
 						_la = TokenStream.LA(1);
@@ -565,7 +565,7 @@ public partial class ArithmeticGrammarParser : Parser {
 							ErrorHandler.ReportMatch(this);
 						    Consume();
 						}
-						State = 56; component(11);
+						State = 56; component(9);
 						}
 						break;
 					case 3:
@@ -573,7 +573,7 @@ public partial class ArithmeticGrammarParser : Parser {
 						_localctx = new AdditionContext(new ComponentContext(_parentctx, _parentState));
 						PushNewRecursionContext(_localctx, _startState, RULE_component);
 						State = 57;
-						if (!(Precpred(Context, 9))) throw new FailedPredicateException(this, "Precpred(Context, 9)");
+						if (!(Precpred(Context, 7))) throw new FailedPredicateException(this, "Precpred(Context, 7)");
 						State = 58;
 						((AdditionContext)_localctx).operatorToken = TokenStream.LT(1);
 						_la = TokenStream.LA(1);
@@ -584,7 +584,7 @@ public partial class ArithmeticGrammarParser : Parser {
 							ErrorHandler.ReportMatch(this);
 						    Consume();
 						}
-						State = 59; component(10);
+						State = 59; component(8);
 						}
 						break;
 					case 4:
@@ -592,9 +592,9 @@ public partial class ArithmeticGrammarParser : Parser {
 						_localctx = new ModuloContext(new ComponentContext(_parentctx, _parentState));
 						PushNewRecursionContext(_localctx, _startState, RULE_component);
 						State = 60;
-						if (!(Precpred(Context, 8))) throw new FailedPredicateException(this, "Precpred(Context, 8)");
+						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
 						State = 61; Match(MOD);
-						State = 62; component(9);
+						State = 62; component(7);
 						}
 						break;
 					}
@@ -625,10 +625,10 @@ public partial class ArithmeticGrammarParser : Parser {
 	}
 	private bool component_sempred(ComponentContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: return Precpred(Context, 11);
-		case 1: return Precpred(Context, 10);
-		case 2: return Precpred(Context, 9);
-		case 3: return Precpred(Context, 8);
+		case 0: return Precpred(Context, 9);
+		case 1: return Precpred(Context, 8);
+		case 2: return Precpred(Context, 7);
+		case 3: return Precpred(Context, 6);
 		}
 		return true;
 	}
@@ -654,11 +654,11 @@ public partial class ArithmeticGrammarParser : Parser {
 		'\x2', '\x6', '\x3', '\x2', '\x2', '\x2', '\x4', '\x33', '\x3', '\x2', 
 		'\x2', '\x2', '\x6', '\a', '\x5', '\x4', '\x3', '\x2', '\a', '\b', '\a', 
 		'\x2', '\x2', '\x3', '\b', '\x3', '\x3', '\x2', '\x2', '\x2', '\t', '\n', 
-		'\b', '\x3', '\x1', '\x2', '\n', '\v', '\a', '\x3', '\x2', '\x2', '\v', 
-		'\f', '\x5', '\x4', '\x3', '\x2', '\f', '\r', '\a', '\x4', '\x2', '\x2', 
-		'\r', '\x34', '\x3', '\x2', '\x2', '\x2', '\xE', '\xF', '\a', '\f', '\x2', 
-		'\x2', '\xF', '\x34', '\a', '\xF', '\x2', '\x2', '\x10', '\x11', '\a', 
-		'\f', '\x2', '\x2', '\x11', '\x34', '\x5', '\x4', '\x3', '\b', '\x12', 
+		'\b', '\x3', '\x1', '\x2', '\n', '\v', '\a', '\f', '\x2', '\x2', '\v', 
+		'\x34', '\a', '\xF', '\x2', '\x2', '\f', '\r', '\a', '\f', '\x2', '\x2', 
+		'\r', '\x34', '\x5', '\x4', '\x3', '\r', '\xE', '\xF', '\a', '\x3', '\x2', 
+		'\x2', '\xF', '\x10', '\x5', '\x4', '\x3', '\x2', '\x10', '\x11', '\a', 
+		'\x4', '\x2', '\x2', '\x11', '\x34', '\x3', '\x2', '\x2', '\x2', '\x12', 
 		'\x13', '\a', '\x5', '\x2', '\x2', '\x13', '\x14', '\x5', '\x4', '\x3', 
 		'\x2', '\x14', '\x15', '\a', '\x6', '\x2', '\x2', '\x15', '\x1B', '\x3', 
 		'\x2', '\x2', '\x2', '\x16', '\x17', '\x5', '\x4', '\x3', '\x2', '\x17', 
@@ -679,18 +679,18 @@ public partial class ArithmeticGrammarParser : Parser {
 		'\x2', '/', '\x34', '\x3', '\x2', '\x2', '\x2', '\x30', '\x34', '\a', 
 		'\xF', '\x2', '\x2', '\x31', '\x34', '\a', '\xE', '\x2', '\x2', '\x32', 
 		'\x34', '\a', '\x12', '\x2', '\x2', '\x33', '\t', '\x3', '\x2', '\x2', 
-		'\x2', '\x33', '\xE', '\x3', '\x2', '\x2', '\x2', '\x33', '\x10', '\x3', 
+		'\x2', '\x33', '\f', '\x3', '\x2', '\x2', '\x2', '\x33', '\xE', '\x3', 
 		'\x2', '\x2', '\x2', '\x33', '\x12', '\x3', '\x2', '\x2', '\x2', '\x33', 
 		'!', '\x3', '\x2', '\x2', '\x2', '\x33', '\x30', '\x3', '\x2', '\x2', 
 		'\x2', '\x33', '\x31', '\x3', '\x2', '\x2', '\x2', '\x33', '\x32', '\x3', 
 		'\x2', '\x2', '\x2', '\x34', '\x43', '\x3', '\x2', '\x2', '\x2', '\x35', 
-		'\x36', '\f', '\r', '\x2', '\x2', '\x36', '\x37', '\a', '\b', '\x2', '\x2', 
-		'\x37', '\x42', '\x5', '\x4', '\x3', '\xE', '\x38', '\x39', '\f', '\f', 
+		'\x36', '\f', '\v', '\x2', '\x2', '\x36', '\x37', '\a', '\b', '\x2', '\x2', 
+		'\x37', '\x42', '\x5', '\x4', '\x3', '\f', '\x38', '\x39', '\f', '\n', 
 		'\x2', '\x2', '\x39', ':', '\t', '\x2', '\x2', '\x2', ':', '\x42', '\x5', 
-		'\x4', '\x3', '\r', ';', '<', '\f', '\v', '\x2', '\x2', '<', '=', '\t', 
-		'\x3', '\x2', '\x2', '=', '\x42', '\x5', '\x4', '\x3', '\f', '>', '?', 
-		'\f', '\n', '\x2', '\x2', '?', '@', '\a', '\r', '\x2', '\x2', '@', '\x42', 
-		'\x5', '\x4', '\x3', '\v', '\x41', '\x35', '\x3', '\x2', '\x2', '\x2', 
+		'\x4', '\x3', '\v', ';', '<', '\f', '\t', '\x2', '\x2', '<', '=', '\t', 
+		'\x3', '\x2', '\x2', '=', '\x42', '\x5', '\x4', '\x3', '\n', '>', '?', 
+		'\f', '\b', '\x2', '\x2', '?', '@', '\a', '\r', '\x2', '\x2', '@', '\x42', 
+		'\x5', '\x4', '\x3', '\t', '\x41', '\x35', '\x3', '\x2', '\x2', '\x2', 
 		'\x41', '\x38', '\x3', '\x2', '\x2', '\x2', '\x41', ';', '\x3', '\x2', 
 		'\x2', '\x2', '\x41', '>', '\x3', '\x2', '\x2', '\x2', '\x42', '\x45', 
 		'\x3', '\x2', '\x2', '\x2', '\x43', '\x41', '\x3', '\x2', '\x2', '\x2', 

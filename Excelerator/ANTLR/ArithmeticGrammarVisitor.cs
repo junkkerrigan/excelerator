@@ -38,19 +38,19 @@ public interface IArithmeticGrammarVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitExpression([NotNull] ArithmeticGrammarParser.ExpressionContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>NegativeNumber</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitNegativeNumber([NotNull] ArithmeticGrammarParser.NegativeNumberContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Minimum</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.

@@ -41,18 +41,6 @@ public interface IArithmeticGrammarListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitExpression([NotNull] ArithmeticGrammarParser.ExpressionContext context);
 	/// <summary>
-	/// Enter a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
-	/// <summary>
-	/// Exit a parse tree produced by the <c>Parenthesis</c>
-	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
-	/// <summary>
 	/// Enter a parse tree produced by the <c>NegativeNumber</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
 	/// </summary>
@@ -64,6 +52,18 @@ public interface IArithmeticGrammarListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitNegativeNumber([NotNull] ArithmeticGrammarParser.NegativeNumberContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>Parenthesis</c>
+	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitParenthesis([NotNull] ArithmeticGrammarParser.ParenthesisContext context);
 	/// <summary>
 	/// Enter a parse tree produced by the <c>Minimum</c>
 	/// labeled alternative in <see cref="ArithmeticGrammarParser.component"/>.

@@ -120,6 +120,12 @@ namespace Excelerator
     {
         public string Expression { get; set; } = "";
 
+        public bool Recalculated { get; set; } = false;
+
+        public HashSet<MyCell> Depended { get; set; } = new HashSet<MyCell>();
+        
+        public HashSet<MyCell> Dependencies { get; set; } = new HashSet<MyCell>();
+        
         public MyCell() : base()
         {
         }
@@ -132,18 +138,27 @@ namespace Excelerator
                 ex.Data.Add("Type", "reference to empty cell");
                 throw ex;
             }
+            if (Recalculated)
+            {
+                return (int)Value;
+            }
             try
             {
                 var inputStream = new AntlrInputStream(Expression);
                 var lexer = new ArithmeticGrammarLexer(inputStream);
                 var commonTokenStream = new CommonTokenStream(lexer);
                 var parser = new ArithmeticGrammarParser(commonTokenStream);
+                parser.RemoveErrorListeners();
+                parser.AddErrorListener(new MyParsErrListener());
                 var expr = parser.expression();
-                return (new MyVisitor(DataGridView as MyTable, usedCells)).Visit(expr);
+                int val = 
+                    (new MyVisitor(DataGridView as MyTable, usedCells, this))
+                    .Visit(expr);
+                Recalculated = true;
+                return val;
             }
-            catch (Exception ex)
+            catch 
             {
-                console.log($"in Evaluate on cell {this}: {ex.Message}");
                 throw;
             }            
         }
@@ -160,12 +175,26 @@ namespace Excelerator
     {
         MyTable Table;
 
+        MyCell Evaluating;
+
         HashSet<string> UsedCells;
 
-        public MyVisitor(MyTable table, HashSet<string> usedCells) : base()
+        public MyVisitor(MyTable table, HashSet<string> usedCells, MyCell evaluating) : base()
         {
             Table = table;
+            Evaluating = evaluating;
             UsedCells = usedCells;
+            //console.log($"Evaluating: {evaluating}");
+            //console.log("Dependecies:");
+            //foreach (var d in evaluating.Dependencies)
+            //{
+            //    console.log(d);
+            //}
+            //console.log("Depended:");
+            //foreach (var d in evaluating.Depended)
+            //{
+            //    console.log(d);
+            //}
         }
         
         public override int VisitExpression(ArithmeticGrammarParser.ExpressionContext context)
@@ -326,7 +355,9 @@ namespace Excelerator
                     titleLen++;
                 int colNum = Converter.ColumnTitleToNumber(cellPosition.Substring(0, titleLen)) - 1;
                 int rowNum = int.Parse(cellPosition.Substring(titleLen)) - 1;
-                MyCell cell = Table.Rows[rowNum].Cells[colNum] as MyCell;
+                MyCell cell = Table.GetCell(rowNum, colNum);
+                cell.Depended.Add(Evaluating);
+                Evaluating.Dependencies.Add(cell);
                 int ans = cell.EvaluateExpression(UsedCells);
                 UsedCells.Remove(cellPosition);
                 Debug.WriteLine($"{cellPosition} {ans}");
@@ -417,6 +448,17 @@ namespace Excelerator
             return Rows[r].Cells[c] as MyCell;
         }
         
+        private void ResetRecalculated()
+        {
+            foreach (DataGridViewRow r in Rows)
+            {
+                foreach (MyCell c in r.Cells)
+                {
+                    c.Recalculated = false;
+                }
+            }
+        }
+        
         public string GetExpressionInCell(int r, int c)
         {
             if (r < 0 || c < 0) throw new IndexOutOfRangeException();
@@ -438,38 +480,42 @@ namespace Excelerator
             return clone;
         }
         
-        public void Recalculate()
+        public void Recalculate(MyCell changed)
         {
-            for (int i = 0; i < N; i++)
+            ResetRecalculated();
+            foreach (var d in changed.Dependencies)
             {
-                for (int j = 0; j < M; j++)
-                {
-                    console.log($"Cell {i} {j}: {GetCell(i, j).Expression}");
-                    if (GetExpressionInCell(i, j) == "")
-                    {
-                        GetCell(i, j).Value = "";
-                        continue;
-                    }
-                    try
-                    { 
-                        var inputStream = new AntlrInputStream(GetExpressionInCell(i, j));
-                        var lexer = new ArithmeticGrammarLexer(inputStream);
-                        var commonTokenStream = new CommonTokenStream(lexer);
-                        var parser = new ArithmeticGrammarParser(commonTokenStream);
-                        parser.RemoveErrorListeners();
-                        parser.AddErrorListener(new MyParsErrListener());
-                        var expr = parser.expression();
-                        GetCell(i, j).Value = 
-                            (new MyVisitor(this, new HashSet<string>())).Visit(expr);
-                    }
-                    catch 
-                    {
-                        console.log("err");
-                        throw;
-                    }
-                }
+                d.Depended.Remove(changed);
             }
-        }
+            changed.Dependencies.Clear();
+            if (changed.Expression == "")
+            {
+                changed.Value = "";
+                return;
+            }
+            try
+            {
+                var inputStream = new AntlrInputStream(changed.Expression);
+                var lexer = new ArithmeticGrammarLexer(inputStream);
+                var commonTokenStream = new CommonTokenStream(lexer);
+                var parser = new ArithmeticGrammarParser(commonTokenStream);
+                parser.RemoveErrorListeners();
+                parser.AddErrorListener(new MyParsErrListener());
+                var expr = parser.expression();
+                changed.Value =
+                    (new MyVisitor(this, new HashSet<string>(), changed))
+                    .Visit(expr);
+            }
+            catch
+            {
+                throw;
+            }
+            changed.Recalculated = true;
+            foreach (var dependency in changed.Depended)
+            {
+
+            }
+        } 
     }
 
     public partial class Form1 : Form
@@ -534,7 +580,7 @@ namespace Excelerator
                 changed.Expression = (string)changed.Value;
                 try
                 {
-                    Table.Recalculate();
+                    Table.Recalculate(changed);
                 }
                 catch (Exception ex)
                 {
@@ -549,7 +595,7 @@ namespace Excelerator
                             "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     changed.Expression = oldExpr;
-                    Table.Recalculate();
+                    Table.Recalculate(changed);
                 }
             };
             Controls.Add(Table);
@@ -575,7 +621,7 @@ namespace Excelerator
                 Table.SelectedCell.Expression = ExpressionInCell.Text;
                 try
                 {
-                    Table.Recalculate();
+                    Table.Recalculate(Table.SelectedCell);
                 }
                 catch (Exception ex)
                 { 
@@ -590,7 +636,7 @@ namespace Excelerator
                             "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     Table.SelectedCell.Expression = oldExpr;
-                    Table.Recalculate();
+                    Table.Recalculate(Table.SelectedCell);
                 }
             };
             Toolbar.Controls.Add(ExpressionInCell);
