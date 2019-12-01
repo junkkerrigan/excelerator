@@ -77,6 +77,7 @@ namespace Excelerator
         {
             string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string title = "";
+            //if (num <= 0) throw new ArgumentException();
             while (num > 0)
             {
                 if (num % 26 == 0)
@@ -494,8 +495,9 @@ namespace Excelerator
             }
         }
 
-        public void DeleteColumn(int idx)
+        public void DeleteColumn(string title)
         {
+            int idx = Converter.ColumnTitleToNumber(title);
             idx--;
             bool canDelete = true;
             for (int i = 0; i < N; i++)
@@ -776,16 +778,15 @@ namespace Excelerator
             };
             DelCol.Click += (s, e) =>
             {
-                string input = Prompt.ShowDialog("Enter number of column to delete:", "");
+                string input = Prompt.ShowDialog("Enter title of column to delete:", "");
                 if (input == "") return;
                 try
                 {
-                    int num = Convert.ToInt32(input);
-                    Table.DeleteColumn(num);
+                    Table.DeleteColumn(input);
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    MessageBox.Show("Invalid number of column", "Error",
+                    MessageBox.Show("Invalid title of column", "Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch
