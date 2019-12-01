@@ -184,17 +184,17 @@ namespace Excelerator
             Table = table;
             Evaluating = evaluating;
             UsedCells = usedCells;
-            //console.log($"Evaluating: {evaluating}");
-            //console.log("Dependecies:");
-            //foreach (var d in evaluating.Dependencies)
-            //{
-            //    console.log(d);
-            //}
-            //console.log("Depended:");
-            //foreach (var d in evaluating.Depended)
-            //{
-            //    console.log(d);
-            //}
+            console.log($"Evaluating: {evaluating}");
+            console.log("Dependecies:");
+            foreach (var d in evaluating.Dependencies)
+            {
+                console.log(d);
+            }
+            console.log("Depended:");
+            foreach (var d in evaluating.Depended)
+            {
+                console.log(d);
+            }
         }
         
         public override int VisitExpression(ArithmeticGrammarParser.ExpressionContext context)
@@ -433,14 +433,68 @@ namespace Excelerator
             }
         }
 
+        private void ResetDepended(MyCell cur)
+        {
+            cur.Value = cur.Expression = "";
+            foreach (var d in cur.Depended)
+            {
+                ResetDepended(d);
+            }
+            cur.Depended.Clear();
+            cur.Dependencies.Clear();
+        }
+
         public void DeleteRow(int num)
         {
             Rows.RemoveAt(num - 1);
         }
 
-        public void DeleteColumn(int num)
+        public void DeleteColumn(int idx)
         {
-            Columns.RemoveAt(num - 1);
+            idx--;
+            bool canDelete = true;
+            for (int i = 0; i < N; i++)
+            {
+                var cell = GetCell(i, idx);
+                foreach (var d in cell.Depended)
+                {
+                    if (d.ColumnIndex == idx) continue;
+                    canDelete = false;
+                    break;
+                }
+            }
+            if (canDelete)
+            {
+                ShiftColTitles(idx);
+                Columns.RemoveAt(idx);
+                return;
+            }
+            var isDelete = MessageBox.Show("If you delete this column, some cells" +
+                " will be cleared. Delete this column?", "Danger",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (isDelete == DialogResult.No) return;
+            try
+            {
+                for (int i = 0; i < N; i++)
+                {
+                    var cell = GetCell(i, idx);
+                    ResetDepended(cell);
+                }
+                ShiftColTitles(idx);
+                Columns.RemoveAt(idx);
+            }
+            catch(Exception ex)
+            {
+                console.log(ex.Message);
+            }
+        }
+
+        private void ShiftColTitles(int to)
+        {
+            for(int i = M - 1; i > to; i--)
+            {
+                Columns[i].HeaderCell.Value = Columns[i - 1].HeaderCell.Value;
+            }
         }
 
         public MyCell GetCell(int r, int c)
@@ -480,6 +534,32 @@ namespace Excelerator
             return clone;
         }
         
+        private void CalculateCell(MyCell cell)
+        {
+            try
+            {
+                var inputStream = new AntlrInputStream(cell.Expression);
+                var lexer = new ArithmeticGrammarLexer(inputStream);
+                var commonTokenStream = new CommonTokenStream(lexer);
+                var parser = new ArithmeticGrammarParser(commonTokenStream);
+                parser.RemoveErrorListeners();
+                parser.AddErrorListener(new MyParsErrListener());
+                var expr = parser.expression();
+                cell.Value =
+                    (new MyVisitor(this, new HashSet<string>(), cell))
+                    .Visit(expr);
+            }
+            catch
+            {
+                throw;
+            }
+            cell.Recalculated = true;
+            foreach (var dep in cell.Depended)
+            {
+                CalculateCell(dep);
+            }
+        }
+
         public void Recalculate(MyCell changed)
         {
             ResetRecalculated();
@@ -488,33 +568,12 @@ namespace Excelerator
                 d.Depended.Remove(changed);
             }
             changed.Dependencies.Clear();
-            if (changed.Expression == "")
-            {
-                changed.Value = "";
-                return;
-            }
-            try
-            {
-                var inputStream = new AntlrInputStream(changed.Expression);
-                var lexer = new ArithmeticGrammarLexer(inputStream);
-                var commonTokenStream = new CommonTokenStream(lexer);
-                var parser = new ArithmeticGrammarParser(commonTokenStream);
-                parser.RemoveErrorListeners();
-                parser.AddErrorListener(new MyParsErrListener());
-                var expr = parser.expression();
-                changed.Value =
-                    (new MyVisitor(this, new HashSet<string>(), changed))
-                    .Visit(expr);
-            }
-            catch
-            {
-                throw;
-            }
-            changed.Recalculated = true;
-            foreach (var dependency in changed.Depended)
-            {
-
-            }
+            //if (changed.Expression == "")
+            //{
+            //    changed.Value = "";
+            //    return;
+            //}
+            CalculateCell(changed);
         } 
     }
 
