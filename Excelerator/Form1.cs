@@ -710,15 +710,27 @@ namespace Excelerator
                     ClientSize.Height - Toolbar.Bottom - 60);
         }
 
-        void InitializeTable()
+        void InitializeTable(MyTable existing = null)
         {
-            Table = new MyTable(10, 10)
+            if (existing == null)
             {
-                Location = new Point(30, Toolbar.Bottom + 30),
-                Size = new Size(ClientSize.Width - 60, 
-                    ClientSize.Height - Toolbar.Bottom - 60),
-            };
-            
+                Table = new MyTable(10, 10)
+                {
+                    Location = new Point(30, Toolbar.Bottom + 30),
+                    Size = new Size(ClientSize.Width - 60,
+                        ClientSize.Height - Toolbar.Bottom - 60),
+                };
+            }
+            else
+            {
+                Table.SuspendLayout();
+                Controls.Remove(Table);
+                existing.Location = new Point(30, Toolbar.Bottom + 30);
+                existing.Size = new Size(ClientSize.Width - 60,
+                    ClientSize.Height - Toolbar.Bottom - 60);
+                Table = existing;
+            }
+
             Table.CellEnter += (s, e) =>
             {
                 MyCell selected = Table.GetCell(e.RowIndex, e.ColumnIndex) as MyCell;
@@ -761,6 +773,7 @@ namespace Excelerator
                 }
             };
             Controls.Add(Table);
+            Table.ResumeLayout();
         }
 
         void InitializeToolbar()
@@ -914,15 +927,9 @@ namespace Excelerator
                 {
                     try
                     {
-                        Table.SuspendLayout();
-                        var newTable = MyTable.CreateFromSerialized(File.ReadAllText(openFrom.FileName));
-                        Controls.Remove(Table);
-                        newTable.Location = new Point(30, Toolbar.Bottom + 30);
-                        newTable.Size = new Size(ClientSize.Width - 60,
-                            ClientSize.Height - Toolbar.Bottom - 60);
-                        Table = newTable;
-                        Controls.Add(Table);
-                        Table.ResumeLayout();
+                        InitializeTable(
+                            MyTable.CreateFromSerialized(
+                                File.ReadAllText(openFrom.FileName)));
                     }
                     catch
                     {
