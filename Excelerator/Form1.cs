@@ -568,12 +568,19 @@ namespace Excelerator
                 d.Depended.Remove(changed);
             }
             changed.Dependencies.Clear();
-            //if (changed.Expression == "")
-            //{
-            //    changed.Value = "";
-            //    return;
-            //}
-            CalculateCell(changed);
+            if (string.IsNullOrWhiteSpace(changed.Expression))
+            {
+                ResetDepended(changed);
+                return;
+            }
+            try
+            {
+                CalculateCell(changed);
+            }
+            catch
+            {
+                throw;
+            }
         } 
     }
 
