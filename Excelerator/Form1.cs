@@ -686,7 +686,7 @@ namespace Excelerator
         public MyTable Table { get; set; }
         bool UpToDate = true;
         MenuStrip MainMenu;
-        ToolStripMenuItem Save, Open;
+        ToolStripMenuItem Save, Open, About;
         TextBox ExpressionInCell;
         Panel Toolbar;
         Button AddRow, AddCol, DelRow, DelCol;
@@ -917,7 +917,7 @@ namespace Excelerator
         {
             MainMenu = new MenuStrip()
             {
-                BackColor = this.BackColor,
+                BackColor = BackColor,
                 Font = new Font("Times New Roman", 12)
             };
             var file = new ToolStripMenuItem("File");
@@ -966,9 +966,15 @@ namespace Excelerator
                     }
                 }
             };
+            About = new ToolStripMenuItem("About");
+            About.Click += (s, e) =>
+            {
+                MessageBox.Show("Лабораторна робота №2\nЛуцик Артем, К-25, Варіант 16\nВ лабораторній реалізовано: \n  можливість додавати і видяляти рядки і стовпці\n  можливість записувати в клітинки як числа, так і вирази, які складються з:\n    додавання, віднімання, множення, ділення НАЦІЛО, операції взяття по модулю\n    піднесення в натуральний степінь\n    дужок\n    посилань на інші клітинки\n  зберігати таблиці в файл і зчитувати їх із файлу");
+            };
             file.DropDownItems.Add(Save);
             file.DropDownItems.Add(Open);
             MainMenu.Items.Add(file);
+            MainMenu.Items.Add(About);
             Controls.Add(MainMenu);
         }
 
