@@ -889,7 +889,7 @@ namespace Excelerator
             };
             DelRow.Click += (s, e) =>
             {
-                string input = Prompt.ShowDialog("Enter number of column to delete:", "");
+                string input = Prompt.ShowDialog("Enter number of row to delete:", "");
                 if (input == "") return;
                 try
                 {
@@ -937,6 +937,16 @@ namespace Excelerator
             Open = new ToolStripMenuItem("Open from");
             Open.Click += (s, e) =>
             {
+                if (!UpToDate)
+                {
+                    var isSave = MessageBox.Show("You have unsaved changes in current table, " +
+                        "they will be lost if you open other. Save changes?", "Danger", MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning);
+                    if (isSave == DialogResult.Yes)
+                    {
+                        Save.PerformClick();
+                    }
+                }
                 var openFrom = new OpenFileDialog()
                 {
                     Filter = "Excelerator files (*.xclr)|*.xclr",
